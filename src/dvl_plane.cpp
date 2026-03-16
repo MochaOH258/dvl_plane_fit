@@ -4,24 +4,14 @@
 #include <Eigen/SVD>
 
 /* 
-    定义了Beam类，用于储存DVL波束的：
-    //测距得到的斜距和有效位
-    //安装角度信息和角度的三角函数值
-    //计算出的在DVL设备坐标系下的波束向量数据
-
-    同时对外暴露：
-    //更新测量得到的斜距和有效位
-    //有效位getter函数
-    //波束向量数组指针getter函数
-
-    在private属性中还包括基于斜距和安装角的向量计算实现
+    
    
     param: valid                 波束有效标志位
     param: distance              斜距
     param: gamma, beta           安装角
     param: cos_gamma, sin_gamma
     param: cos_beta, sin_beta
-    param: vector[3]             波束向量，描述其分量大小与方向
+    param: vec             波束向量，描述其分量大小与方向
 */
 class Beam{
     private:
@@ -79,15 +69,14 @@ class Beam{
 };
 
 /* 
-    定义了Plane类
-    用于储存由dvl波束测距点拟合出的平面数据，还存储了某次计算数据的有效位和使用的波束数
-    对于四点进行平面拟合，还存储了计算出的残差
+    
+  
 */
 class Plane{
     private:
     bool valid;
     int beam_count;
-    double a,b,c,d;
+    double d;
     double residual;
     Beam& B1;
     Beam& B2;
@@ -104,10 +93,11 @@ class Plane{
         对于有效波束数=3，将使用三点直接拟合平面
 
         对于有效波束数>3，即为4，将使用svd解最小二乘拟合平面并计算残差
-        >>使用eigen库实现这部分计算
+
+        >使用eigen库进行计算
    */
 
-    int plane_cal(void)
+    bool plane_cal(void)
     {
         Beam* beams[4] = {&B1, &B2, &B3, &B4};
         beam_count = int(B1.valid_get()) + int(B2.valid_get()) + int(B3.valid_get()) + int(B4.valid_get());
@@ -130,7 +120,7 @@ class Plane{
             v1 = selected[1]-selected[0];
             v2 = selected[2]-selected[0];
             n = v1.cross(v2);
-            n.normalized();
+            n.normalize();
             /* 
                 a(x-x0)+b(y-y0)+c(z-z0)=0;
                 ax+by+cz+d=0;
@@ -172,19 +162,17 @@ class Plane{
             n = svd.matrixV().col(2);
             n.normalize();
 
-            if (n.dot(centroid) > 0) {
+            if (n(0)<0) {
                 n = -n;
                 }
-            double d_1 = -n.dot(centroid);
-            a = n.x();
-            b = n.y();
-            c = n.z();
-            d = d_1;
+            d = -n.dot(centroid);
+           
+            
 
-            double e1 = n.dot(p1) + d_1;
-            double e2 = n.dot(p2) + d_1;
-            double e3 = n.dot(p3) + d_1;
-            double e4 = n.dot(p4) + d_1;
+            double e1 = n.dot(p1) + d;
+            double e2 = n.dot(p2) + d;
+            double e3 = n.dot(p3) + d;
+            double e4 = n.dot(p4) + d;
 
             residual = std::sqrt((e1*e1 + e2*e2 + e3*e3 + e4*e4) / 4.0);
 
@@ -196,10 +184,39 @@ class Plane{
     public:
     Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4)
     : valid(false), beam_count(0),
-      a(0.0), b(0.0), c(0.0), d(0.0), residual(0.0),
+      d(0.0), residual(0.0),
       B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4)
     {}
     
+    bool update(void)
+    {
+        /* 
+            调用波束数据进行平面拟合，返回此次拟合出平面的有效位
+            未对波束信息是否全部更新进行检查，需要在更新波束数据后调用
+        */
+        return plane_cal();
+    }
 
+    bool valid_get(void) const
+    {
+        /* 
+            有效位getter函数
+            --返回值为波束有效位
+        */
+        return valid;
+    }
+
+    const Eigen::Vector3d& vector_get(void) const {
+        /* 
+            返回一个向量，可以看作描述ROV与平面夹角的向量
+            向量x轴分量方向为x轴正方向
+        */
+        return n;
+    }
+
+    double d_get(void) const
+    {
+        return d;
+    }
 
 };
