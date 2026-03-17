@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include <Eigen/Dense>
-#include <Eigen/SVD>
+
 
 /* 
     
@@ -92,7 +92,7 @@ class Plane{
 
         对于有效波束数=3，将使用三点直接拟合平面
 
-        对于有效波束数>3，即为4，将使用svd解最小二乘拟合平面并计算残差
+        对于有效波束数>3，即为4，将使用协方差解最小二乘拟合平面并计算残差
 
         >使用eigen库进行计算
    */
@@ -149,17 +149,21 @@ class Plane{
             
             Eigen::Vector3d centroid = (p1 + p2 + p3 + p4) / 4.0;
 
-            Eigen::Matrix<double, 4, 3> X;
-            X.row(0) = (p1 - centroid).transpose();
-            X.row(1) = (p2 - centroid).transpose();
-            X.row(2) = (p3 - centroid).transpose();
-            X.row(3) = (p4 - centroid).transpose();
+            Eigen::Matrix3d C = Eigen::Matrix3d::Zero();
 
-            Eigen::JacobiSVD<Eigen::Matrix<double, 4, 3>> svd(
-                X, Eigen::ComputeFullV
-                );
+            Eigen::Vector3d q1 = p1 - centroid;
+            Eigen::Vector3d q2 = p2 - centroid;
+            Eigen::Vector3d q3 = p3 - centroid;
+            Eigen::Vector3d q4 = p4 - centroid;
 
-            n = svd.matrixV().col(2);
+            C += q1 * q1.transpose();
+            C += q2 * q2.transpose();
+            C += q3 * q3.transpose();
+            C += q4 * q4.transpose();
+
+            Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es(C);
+
+            n = es.eigenvectors().col(0);
             n.normalize();
 
             if (n(0)<0) {
@@ -167,13 +171,10 @@ class Plane{
                 }
             d = -n.dot(centroid);
            
-            
-
-            double e1 = n.dot(p1) + d;
-            double e2 = n.dot(p2) + d;
-            double e3 = n.dot(p3) + d;
-            double e4 = n.dot(p4) + d;
-
+            double e1 = n.dot(p1) + d; 
+            double e2 = n.dot(p2) + d; 
+            double e3 = n.dot(p3) + d; 
+            double e4 = n.dot(p4) + d; 
             residual = std::sqrt((e1*e1 + e2*e2 + e3*e3 + e4*e4) / 4.0);
 
             valid = 1;
@@ -186,7 +187,9 @@ class Plane{
     : valid(false), beam_count(0),
       d(0.0), residual(0.0),
       B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4)
-    {}
+    {
+        n(Eigen::Vector3d::Zero());
+    }
     
     bool update(void)
     {
@@ -208,7 +211,7 @@ class Plane{
 
     const Eigen::Vector3d& vector_get(void) const {
         /* 
-            返回一个向量，可以看作描述ROV与平面夹角的向量
+            返回ROV到平面的法向量
             向量x轴分量方向为x轴正方向
         */
         return n;
