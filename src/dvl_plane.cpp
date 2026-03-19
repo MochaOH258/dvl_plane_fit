@@ -188,7 +188,7 @@ class Plane{
       d(0.0), residual(0.0),
       B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4)
     {
-        n(Eigen::Vector3d::Zero());
+        n = Eigen::Vector3d::Zero();
     }
     
     bool update(void)
