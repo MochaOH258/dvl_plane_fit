@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(dvl_plane_fit
     src/main.cpp
     src/dvl_plane.cpp
+    src/pid.cpp
 )
 
 target_include_directories(dvl_plane_fit PRIVATE

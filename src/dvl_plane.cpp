@@ -1,7 +1,4 @@
-#include <cmath>
-
-#include <Eigen/Dense>
-
+#include <dvl_plane.h>
 
 /* 
     
@@ -47,9 +44,9 @@ class Beam{
         */
     void beam_data_update(double d, bool v)
     {
-        valid = v;
         distance = d;
         beam_vector_cal();
+        valid = v;
     }
 
     bool valid_get(void) const
@@ -176,6 +173,13 @@ class Plane{
             double e3 = n.dot(p3) + d; 
             double e4 = n.dot(p4) + d; 
             residual = std::sqrt((e1*e1 + e2*e2 + e3*e3 + e4*e4) / 4.0);
+            /* 
+                if (residual>?)
+                {
+                    valid = 0;
+                }
+                    //残差过大处理
+            */
 
             valid = 1;
         }
