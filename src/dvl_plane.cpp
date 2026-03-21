@@ -1,4 +1,4 @@
-#include <dvl_plane.h>
+#include "dvl_plane.h"
 
 /* 
     
@@ -10,22 +10,13 @@
     param: cos_beta, sin_beta
     param: vec             波束向量，描述其分量大小与方向
 */
-class Beam{
-    private:
-    bool valid;
-    double distance;
-    double gamma, beta;
-    double cos_gamma, sin_gamma;
-    double cos_beta, sin_beta;
-    Eigen::Vector3d vec;
 
-    void beam_vector_cal(void)
+    void Beam::beam_vector_cal(void)
     {
         vec << distance*cos_gamma, distance*sin_gamma*cos_beta, distance*sin_gamma*sin_beta;
     }
 
-    public:
-    Beam(
+    Beam::Beam(
         double g, double b
         ) 
         : valid(false), distance(0.0), gamma(g), beta(b){
@@ -34,7 +25,7 @@ class Beam{
             cos_beta = cos(beta);
             sin_beta = sin(beta);
 
-        };
+        }
     
         /* 
             波束数据更新函数
@@ -42,7 +33,7 @@ class Beam{
             1. 斜距
             2. 波束有效标志位
         */
-    void beam_data_update(double d, bool v)
+    void Beam::beam_data_update(double d, bool v)
     {
         if (v == true)
         {
@@ -53,7 +44,7 @@ class Beam{
         valid = v;
     }
 
-    bool valid_get(void) const
+    bool Beam::valid_get(void) const
     {
         /* 
             有效位getter函数
@@ -65,26 +56,15 @@ class Beam{
     /* 
         
     */
-    const Eigen::Vector3d& vector_get(void) const {return vec;}
+    const Eigen::Vector3d& Beam::vector_get(void) const {return vec;}
     
-};
+
 
 /* 
     
   
 */
-class Plane{
-    private:
-    bool valid;
-    int beam_count;
-    double d;
-    double residual;
-    Beam& B1;
-    Beam& B2;
-    Beam& B3;
-    Beam& B4;
-    
-    Eigen::Vector3d n;
+
     
    /* 
         平面拟合实现
@@ -98,7 +78,7 @@ class Plane{
         >使用eigen库进行计算
    */
 
-    bool plane_cal(void)
+    bool Plane::plane_cal(void)
     {
         Beam* beams[4] = {&B1, &B2, &B3, &B4};
         beam_count = int(B1.valid_get()) + int(B2.valid_get()) + int(B3.valid_get()) + int(B4.valid_get());
@@ -190,8 +170,7 @@ class Plane{
         return valid;
     }
 
-    public:
-    Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4)
+    Plane::Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4)
     : valid(false), beam_count(0),
       d(0.0), residual(0.0),
       B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4)
@@ -199,7 +178,7 @@ class Plane{
         n = Eigen::Vector3d::Zero();
     }
     
-    bool update(void)
+    bool Plane::update(void)
     {
         /* 
             调用波束数据进行平面拟合，返回此次拟合出平面的有效位
@@ -208,7 +187,7 @@ class Plane{
         return plane_cal();
     }
 
-    bool valid_get(void) const
+    bool Plane::valid_get(void) const
     {
         /* 
             有效位getter函数
@@ -217,7 +196,7 @@ class Plane{
         return valid;
     }
 
-    const Eigen::Vector3d& vector_get(void) const {
+    const Eigen::Vector3d& Plane::vector_get(void) const {
         /* 
             返回ROV到平面的法向量
             向量x轴分量方向为x轴正方向
@@ -225,14 +204,15 @@ class Plane{
         return n;
     }
 
-    double d_get(void) const
+    double Plane::d_get(void) const
     {
-        return abs(d);
+        return std::abs(d);
     }
 
-    double horizon_angle_get(void) const
+    /* 
+        返回用角度表示的水平夹角
+    */
+    double Plane::horizon_angle_get(void) const
     {
-        return atan2(n(1), n(0))*(180.0 / M_PI);
+        return std::atan2(n(1), n(0))*(180.0 / M_PI);
     }
-
-};
