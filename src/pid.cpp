@@ -6,7 +6,6 @@
 /* 
     todo
     具体的拟合失效处理，现有较简陋
-    pid微分频率
     
 */
     double Controller::yaw_ctrl(double yaw) 
@@ -155,7 +154,7 @@
 
     double PID::pid_cal(double err)
         {
-            int_err += err;
+            int_err += err*dt;
             /* 
                 if (int_err>?)
                 {
@@ -166,13 +165,13 @@
                     int_err = ?;
                 }
             */
-           double delta = err - pre_err;
+           double delta = (err - pre_err)/dt;
            pre_err = err;
 
            return kp*err + ki*int_err + kd*delta;
         }
 
-    PID::PID(double p, double i, double d): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0) {}
+    PID::PID(double p, double i, double d, double t): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0), dt(t){}
 
     void PID::set_pid(double p, double i, double d)
     {

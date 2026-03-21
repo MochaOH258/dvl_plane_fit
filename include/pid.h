@@ -11,13 +11,15 @@ class PID{
     double ki;
     double kd;
 
+    double dt;
+
     double pre_err;
     double int_err;
     
     double pid_cal(double err);
 
     public:
-    PID(double p, double i, double d);
+    PID(double p, double i, double d, double t);
     void set_pid(double p, double i, double d);
     double pid_output(double error);
 

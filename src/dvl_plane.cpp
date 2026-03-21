@@ -1,15 +1,6 @@
 #include "dvl_plane.h"
 
-/* 
-    
-   
-    param: valid                 波束有效标志位
-    param: distance              斜距
-    param: gamma, beta           安装角
-    param: cos_gamma, sin_gamma
-    param: cos_beta, sin_beta
-    param: vec             波束向量，描述其分量大小与方向
-*/
+
 
     void Beam::beam_vector_cal(void)
     {
@@ -27,12 +18,7 @@
 
         }
     
-        /* 
-            波束数据更新函数
-            -从左到右应该传入：
-            1. 斜距
-            2. 波束有效标志位
-        */
+        
     void Beam::beam_data_update(double d, bool v)
     {
         if (v == true)
@@ -53,30 +39,8 @@
         return valid;
     }
 
-    /* 
-        
-    */
     const Eigen::Vector3d& Beam::vector_get(void) const {return vec;}
     
-
-
-/* 
-    
-  
-*/
-
-    
-   /* 
-        平面拟合实现
-
-        对于有效波束数<3，将跳过计算并将有效位置零
-
-        对于有效波束数=3，将使用三点直接拟合平面
-
-        对于有效波束数>3，即为4，将使用协方差解最小二乘拟合平面并计算残差
-
-        >使用eigen库进行计算
-   */
 
     bool Plane::plane_cal(void)
     {
@@ -180,19 +144,11 @@
     
     bool Plane::update(void)
     {
-        /* 
-            调用波束数据进行平面拟合，返回此次拟合出平面的有效位
-            未对波束信息是否全部更新进行检查，需要在更新波束数据后调用
-        */
         return plane_cal();
     }
 
     bool Plane::valid_get(void) const
     {
-        /* 
-            有效位getter函数
-            --返回值为波束有效位
-        */
         return valid;
     }
 
@@ -209,10 +165,7 @@
         return std::abs(d);
     }
 
-    /* 
-        返回用角度表示的水平夹角
-    */
     double Plane::horizon_angle_get(void) const
     {
-        return std::atan2(n(1), n(0))*(180.0 / M_PI);
+        return std::atan2(n(1), n(0));
     }
