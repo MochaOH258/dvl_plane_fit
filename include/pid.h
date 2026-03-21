@@ -4,46 +4,48 @@
 #include <Eigen/Dense>
 #include <dvl_plane.h>
 
+class Controller{
+    private:
+    double expc_distance;
+    double expc_yaw_angle;
+    double expc_v_sway;
 
+    double cmd[3];
+
+    PID& YawPID;
+    PID& DistancePID;
+    PID& VPID;
+
+    Plane& MyPlane;
+
+    double yaw_crtl(double yaw) const;
+    double dist_ctrl(double d) const;
+    double v_ctrl(double v) const;
+
+    public:
+    Controller(double expc_d, double expc_yaw, double expc_v, 
+        PID& Yaw, PID& Distance, PID& V
+    );
+    void set_expc_distance(double dis);
+    void set_expc_yaw(double y);
+    void set_expc_v_sway(double v);
+    const double* cmd_get(double v);
+};
 
 class PID{
     protected:
     double kp;
     double ki;
     double kd;
-    double err;
+
     double pre_err;
     double int_err;
-    double pid_cal(double error);
 
     public:
     PID(double p, double i, double d);
     void set_pid(double p, double i, double d);
+    double pid_output(double error);
 
-};
-
-class Yaw_PID: public PID{
-    private:
-       
-    public:
-    Yaw_PID(double p, double i, double d);
-    double yaw_control(double yaw, double expc_yaw);
-};
-
-class Surge_Pid: public PID{
-    private:
-
-    public:
-     Surge_Pid(double p, double i, double d);
-     double surge_control(double d, double expc_d);
-};
-
-class Sway_Pid: public PID{
-    private:
-
-    public:
-    Sway_Pid(double p, double i, double d);
-    double sway_control(double v, double expc_v);
 };
 
 

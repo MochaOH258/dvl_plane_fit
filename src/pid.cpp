@@ -1,63 +1,132 @@
 #include <pid.h>
 /* 
-    todo
-    修正本文件逻辑，包括但应该不止：
-    surge_pid逻辑
-    上升控制
-    参数名称统一与优化
-    头文件修正
+
 */
 
 class Controller{
     private:
-    //期望的水平夹角
-    double expc_disdance;
-    //期望巡检速度
-    double expc_angle;
+    double expc_distance;
+    double expc_yaw_angle;
     double expc_v_sway;
 
-    Yaw_PID& PID_Yaw;
-    Surge_Pid& PID_Surge;
-    Sway_Pid& PID_Sway;
+    double yaw_error;
 
+    //cmd[0] = r_cmd
+    //cmd[1] = u_cmd
+    //cmd[2] = v_cmd
+    double cmd[3] = {0.0, 0.0, 0.0};
+
+    PID& YawPID;
+    PID& DistancePID;
+    PID& VPID;
+
+    Plane& MyPlane;
+
+    double yaw_crtl(double yaw) 
+    {
+        double yaw_err = expc_yaw_angle - yaw;
+        if (yaw_err > 180)
+        {
+            yaw_err -= 360.0;
+        }
+        else if (yaw_err < -180)
+        {
+            yaw_err += 360.0;
+        }
+
+        yaw_error = yaw_err;
+
+        double r_cmd = YawPID.pid_output(yaw_err);
+
+        /* 
+            if (r > ?)
+            {
+                r = ?;
+            }
+            else if (r < ?)
+            {
+                r = ?;
+            }
+        */
+
+        cmd[0] = r_cmd;
+        return r_cmd;
+    }
+
+    double dist_ctrl(double d)
+    {
+        double dist_err = expc_distance - dist_err;
+
+        double u_cmd = DistancePID.pid_output(dist_err);
+
+        /* 限幅, 考虑yaw_error */
+        cmd[1] = u_cmd;
+        return u_cmd;
+    }
+
+    double v_ctrl(double v)
+    {
+        double v_err = expc_v_sway - v;
+
+        double v_cmd = VPID.pid_output(v_err);
+        /* 限幅 */
+        cmd[2] = v_cmd;
+        return v_cmd;
+        
+    }
 
     public:
-    Controller(double ex_d, double ex_an, double ex_v,
-    Yaw_PID& PID_Y, Surge_Pid& PID_Su, Sway_Pid& PID_Sw
+    Controller(double expc_d, double expc_yaw, double expc_v, 
+        PID& Yaw, PID& Distance, PID& V, 
+        Plane& P
     ) :
-    expc_disdance(ex_d), expc_angle(ex_an), expc_v_sway(ex_v), 
-    PID_Yaw(PID_Y), PID_Surge(PID_Su), PID_Sway(PID_Sw)
+    expc_distance(expc_d), expc_yaw_angle(expc_yaw), expc_v_sway(expc_v),
+    YawPID(Yaw), DistancePID(Distance), VPID(V), 
+    MyPlane(P), 
+    yaw_error(0.0)
     {}
 
-    double yaw_control_get(double y) const
+    void set_expc_distance(double dis)
     {
-        return PID_Yaw.yaw_control(y, expc_angle);
+        expc_distance = dis;
     }
 
-    double surge_control_get(double distance) const
+    void set_expc_yaw(double y)
     {
-        return PID_Surge.surge_control(distance, expc_disdance);
+        expc_yaw_angle = y;
     }
 
-    double sway_control_get(double v_s) const
+    void set_expc_v_sway(double v)
     {
-        return PID_Sway.sway_control(v_s, expc_v_sway);
+        expc_v_sway = v;
     }
+
+    const double* cmd_get(double v)
+    {
+        if (MyPlane.valid_get())
+        {
+            yaw_crtl(MyPlane.horizon_angle_get());
+            dist_ctrl(MyPlane.d_get());
+        }
+        v_ctrl(v);
+        return cmd;
+    }
+
+    
 };
 
 class PID{
-    protected:
+    private:
     double kp;
     double ki;
     double kd;
 
-    double err;
     double pre_err;
     double int_err;
 
-     double pid_cal(double error)
+     double pid_cal(double err)
         {
-            int_err += error;
+            int_err += err;
             /* 
                 if (int_err>?)
                 {
@@ -68,57 +137,23 @@ class PID{
                     int_err = ?;
                 }
             */
-           double delta = error - pre_err;
-           pre_err = error;
-           err = error;
+           double delta = err - pre_err;
+           pre_err = err;
 
-           return kp*error + ki*int_err + kd*delta;
+           return kp*err + ki*int_err + kd*delta;
         }
 
     public:
-    PID(double p, double i, double d): kp(p), ki(i), kd(d)
-    {
-
-    }
+    PID(double p, double i, double d): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0) {}
     void set_pid(double p, double i, double d)
     {
         kp = p;
         ki = i;
         kd = d;
     }
-
-};
-
-class Yaw_PID: public PID{
-    private:
-       
-
-    public:
-    Yaw_PID(double p, double i, double d) : PID(p, i, d){}
-    double yaw_control(double yaw, double expc_yaw)
+    double pid_output(double error)
     {
-        return pid_cal(yaw - expc_yaw);
+        return pid_cal(error);
     }
-};
 
-class Surge_Pid: public PID{
-    private:
-
-    public:
-     Surge_Pid(double p, double i, double d) : PID(p, i, d){}
-     double surge_control(double d, double expc_d)
-     {
-        return pid_cal(d-expc_d);
-     }
-};
-
-class Sway_Pid: public PID{
-    private:
-
-    public:
-    Sway_Pid(double p, double i, double d) : PID(p, i, d){}
-    double sway_control(double v, double expc_v)
-    {
-        return pid_cal(v-expc_v);
-    }
 };

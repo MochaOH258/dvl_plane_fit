@@ -41,6 +41,7 @@ class Plane{
     bool valid_get(void) const;
     const Eigen::Vector3d& vector_get(void) const;
     double d_get(void) const;
+    double horizon_angle_get(void) const;
 };
 
 #endif
