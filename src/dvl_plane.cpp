@@ -44,7 +44,7 @@ class Beam{
         */
     void beam_data_update(double d, bool v)
     {
-        if (v = true)
+        if (v == true)
         {
             distance = d;
             beam_vector_cal();
@@ -227,12 +227,12 @@ class Plane{
 
     double d_get(void) const
     {
-        return d;
+        return abs(d);
     }
 
     double horizon_angle_get(void) const
     {
-        return atan2(n(0), n(1));
+        return atan2(n(1), n(0))*(180.0 / M_PI);
     }
 
 };

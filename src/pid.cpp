@@ -11,10 +11,10 @@ class Controller{
 
     double yaw_error;
 
-    //cmd[0] = r_cmd
-    //cmd[1] = u_cmd
-    //cmd[2] = v_cmd
-    double cmd[3] = {0.0, 0.0, 0.0};
+    static constexpr int idx_r = 0;
+    static constexpr int idx_u = 1;
+    static constexpr int idx_v = 2;
+    std::array<double,3> cmd{0.0, 0.0, 0.0};
 
     PID& YawPID;
     PID& DistancePID;
@@ -22,7 +22,7 @@ class Controller{
 
     Plane& MyPlane;
 
-    double yaw_crtl(double yaw) 
+    double yaw_ctrl(double yaw) 
     {
         double yaw_err = expc_yaw_angle - yaw;
         if (yaw_err > 180)
@@ -49,18 +49,18 @@ class Controller{
             }
         */
 
-        cmd[0] = r_cmd;
+        cmd[idx_r] = r_cmd;
         return r_cmd;
     }
 
     double dist_ctrl(double d)
     {
-        double dist_err = expc_distance - dist_err;
+        double dist_err = expc_distance - d;
 
         double u_cmd = DistancePID.pid_output(dist_err);
 
         /* 限幅, 考虑yaw_error */
-        cmd[1] = u_cmd;
+        cmd[idx_u] = u_cmd;
         return u_cmd;
     }
 
@@ -70,7 +70,7 @@ class Controller{
 
         double v_cmd = VPID.pid_output(v_err);
         /* 限幅 */
-        cmd[2] = v_cmd;
+        cmd[idx_v] = v_cmd;
         return v_cmd;
         
     }
@@ -101,12 +101,17 @@ class Controller{
         expc_v_sway = v;
     }
 
-    const double* cmd_get(double v)
+    std::array<double, 3> cmd_get(double v)
     {
         if (MyPlane.valid_get())
         {
-            yaw_crtl(MyPlane.horizon_angle_get());
+            yaw_ctrl(MyPlane.horizon_angle_get());
             dist_ctrl(MyPlane.d_get());
+        }
+        else
+        {
+            cmd[idx_r] = 0.0;
+            cmd[idx_u] = 0.0;
         }
         v_ctrl(v);
         return cmd;

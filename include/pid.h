@@ -1,6 +1,8 @@
 #ifndef PID__H
 #define PID__H
 
+#include <array>
+
 #include <Eigen/Dense>
 #include <dvl_plane.h>
 
@@ -18,7 +20,7 @@ class Controller{
 
     Plane& MyPlane;
 
-    double yaw_crtl(double yaw) const;
+    double yaw_ctrl(double yaw) const;
     double dist_ctrl(double d) const;
     double v_ctrl(double v) const;
 
@@ -29,7 +31,7 @@ class Controller{
     void set_expc_distance(double dis);
     void set_expc_yaw(double y);
     void set_expc_v_sway(double v);
-    const double* cmd_get(double v);
+    std::array<double, 3> cmd_get(double v);
 };
 
 class PID{
