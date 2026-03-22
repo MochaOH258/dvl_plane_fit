@@ -22,6 +22,7 @@ class PID{
     PID(double p, double i, double d, double t);
     void set_pid(double p, double i, double d);
     double pid_output(double error);
+    double set_dt(double t);
 
 };
 

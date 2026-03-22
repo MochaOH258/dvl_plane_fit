@@ -6,10 +6,11 @@
 /* 
     todo
     具体的拟合失效处理，现有较简陋
-    
+    微分滤波
 */
     double Controller::yaw_ctrl(double yaw) 
     {
+        yaw = yaw/M_PI * 180;
         double yaw_err = expc_yaw_angle - yaw;
         if (yaw_err > 180)
         {
@@ -154,17 +155,19 @@
 
     double PID::pid_cal(double err)
         {
+            //temp
+            //可能加微分滤波
             int_err += err*dt;
-            /* 
-                if (int_err>?)
+            
+                if (int_err>10)
                 {
-                    int_err = ?;
+                    int_err = 10;
                 }
-                else if (int_err<?)
+                else if (int_err<-10)
                 {
-                    int_err = ?;
+                    int_err = -10;
                 }
-            */
+            
            double delta = (err - pre_err)/dt;
            pre_err = err;
 
@@ -183,6 +186,12 @@
     double PID::pid_output(double error)
     {
         return pid_cal(error);
+    }
+
+    double PID::set_dt(double t)
+    {
+        dt = t;
+        return dt;
     }
 
 
