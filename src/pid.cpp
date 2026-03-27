@@ -10,31 +10,31 @@
 */
     double Controller::yaw_ctrl(double yaw) 
     {
-        yaw = yaw/M_PI * 180;
-        double yaw_err = expc_yaw_angle - yaw;
-        if (yaw_err > 180)
+        
+        double yaw_err = yaw - expc_yaw_angle;
+        if (yaw_err > M_PI)
         {
-            yaw_err -= 360.0;
+            yaw_err -= M_PI;
         }
-        else if (yaw_err < -180)
+        else if (yaw_err < -M_PI)
         {
-            yaw_err += 360.0;
+            yaw_err += M_PI;
         }
 
         yaw_error = yaw_err;
 
         double r_cmd = YawPID.pid_output(yaw_err);
 
-        /* 
-            if (r > ?)
+         
+            if (r_cmd > 5)
             {
-                r = ?;
+                r_cmd = 5;
             }
-            else if (r < ?)
+            else if (r_cmd < -5)
             {
-                r = ?;
+                r_cmd = -5;
             }
-        */
+        
 
         cmd[idx_r] = r_cmd;
         return r_cmd;
@@ -42,11 +42,23 @@
 
     double Controller::dist_ctrl(double d)
     {
-        double dist_err = expc_distance - d;
+        double dist_err = d - expc_distance;
 
         double u_cmd = DistancePID.pid_output(dist_err);
 
         /* 限幅, 考虑yaw_error */
+        if (std::abs(yaw_error) > 20)
+        {
+            u_cmd*=0.2;
+        }
+        if (u_cmd > 2)
+            {
+                u_cmd = 2;
+            }
+            else if (u_cmd < -2)
+            {
+                u_cmd = -2;
+            }
         cmd[idx_u] = u_cmd;
         return u_cmd;
     }
@@ -57,6 +69,18 @@
 
         double v_cmd = VPID.pid_output(v_err);
         /* 限幅 */
+        if (std::abs(yaw_error) > 20)
+        {
+            v_cmd*=0.2;
+        }
+        if (v_cmd > 2)
+            {
+                v_cmd = 2;
+            }
+            else if (v_cmd < -2)
+            {
+                v_cmd = -2;
+            }
         cmd[idx_v] = v_cmd;
         return v_cmd;
         
@@ -188,10 +212,9 @@
         return pid_cal(error);
     }
 
-    double PID::set_dt(double t)
+    void PID::set_dt(double t)
     {
         dt = t;
-        return dt;
     }
 
 

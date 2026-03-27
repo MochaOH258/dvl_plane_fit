@@ -20,8 +20,8 @@ class SubInterface{
         Controller& C;
     public:
         SubInterface(Plane &Pl, Beam& b1, Beam& b2, Beam& b3, Beam& b4, Controller& c);
-        double update_data(std::array<double, 4> d_array, std::array<bool, 4> valid_array, double v);
-        double update_cmd(std::array<double, 3> cmd);
+        void update_data(std::array<double, 4> d_array, std::array<bool, 4> valid_array, double v);
+        void update_cmd(std::array<double, 3> cmd);
         std::array<double, 3> get_cmd(std::array<double, 4> d_array, std::array<bool, 4> valid_array, double v);
 
 };
