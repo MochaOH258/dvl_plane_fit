@@ -1,5 +1,4 @@
-#include "dvl_plane.h"
-
+    #include "dvl_plane.h"
 
 
     void Beam::beam_vector_cal(void)
@@ -32,10 +31,7 @@
 
     bool Beam::valid_get(void) const
     {
-        /* 
-            有效位getter函数
-            --返回值为波束有效位
-        */
+       
         return valid;
     }
 
