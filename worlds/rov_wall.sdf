@@ -28,7 +28,7 @@
     </light>
 
     <!-- 地面 -->
-    <model name="ground" static="true">
+    <model name="ground">
       <static>true</static>
       <link name="ground_link">
         <collision name="ground_collision">

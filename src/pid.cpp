@@ -183,7 +183,7 @@
             }
             
 
-           return kp*err + ki*int_err + kd*delta;
+           return output;
         }
 
     PID::PID(double p, double i, double d, double t, double m): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0), dt(t), max(m){}
