@@ -1,0 +1,267 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <world name="rov_wall">
+
+    <!-- 基础系统 -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- 光照 -->
+    <light name="sun" type="directional">
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -1</direction>
+    </light>
+
+    <!-- 地面 -->
+    <model name="ground" static="true">
+      <static>true</static>
+      <link name="ground_link">
+        <collision name="ground_collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="ground_visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>200 200</size>
+            </plane>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 巨大圆柱：半径20m，高度20m，中心在 z=10m -->
+    <model name="big_cylinder">
+      <static>true</static>
+      <pose>0 0 10 0 0 0</pose>
+      <link name="cylinder_link">
+        <collision name="cylinder_collision">
+          <geometry>
+            <cylinder>
+              <radius>20.0</radius>
+              <length>20.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="cylinder_visual">
+          <geometry>
+            <cylinder>
+              <radius>20.0</radius>
+              <length>20.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.2 0.5 0.8 1</ambient>
+            <diffuse>0.2 0.5 0.8 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 简化 ROV -->
+    <!-- 放在圆柱外侧 +x 方向，距表面 2 m -->
+    <!-- 圆柱半径 20 m，因此初始 x = 22 m -->
+    <!-- yaw = pi，表示机体前向朝向 -x，也就是正对圆柱 -->
+    <model name="rov">
+      <pose>22 0 10 0 0 3.141592653589793</pose>
+
+    <frame name="beam1_frame" attached_to="base_link">
+      <pose>0.25 0 0 0 -0.615479709  0.785398163</pose>
+    </frame>
+    <frame name="beam2_frame" attached_to="base_link">
+      <pose>0.25 0 0 0  0.615479709  0.785398163</pose>
+    </frame>
+    <frame name="beam3_frame" attached_to="base_link">
+      <pose>0.25 0 0 0  0.615479709 -0.785398163</pose>
+    </frame>
+    <frame name="beam4_frame" attached_to="base_link">
+      <pose>0.25 0 0 0 -0.615479709 -0.785398163</pose>
+    </frame>
+      <link name="base_link">
+        <!-- 先关掉重力，避免没有浮力模型时下沉 -->
+        <gravity>false</gravity>
+
+        <inertial>
+          <mass>20.0</mass>
+          <inertia>
+            <ixx>1.0</ixx>
+            <iyy>1.0</iyy>
+            <izz>1.0</izz>
+            <ixy>0.0</ixy>
+            <ixz>0.0</ixz>
+            <iyz>0.0</iyz>
+          </inertia>
+        </inertial>
+
+        <collision name="base_collision">
+          <geometry>
+            <box>
+              <size>0.6 0.4 0.25</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="base_visual">
+          <geometry>
+            <box>
+              <size>0.6 0.4 0.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.9 0.3 0.3 1</ambient>
+            <diffuse>0.9 0.3 0.3 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+
+        <!-- beam1 -->
+        <sensor name="beam1" type="gpu_lidar">
+          <pose relative_to="beam1_frame">0 0 0 0 0 0</pose>
+          <topic>/beam1</topic>
+          <update_rate>20</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>30.0</max>
+              <resolution>0.001</resolution>
+            </range>
+          </ray>
+          <always_on>true</always_on>
+          <visualize>true</visualize>
+        </sensor>
+
+        <!-- beam2 -->
+        <sensor name="beam2" type="gpu_lidar">
+          <pose relative_to="beam2_frame">0 0 0 0 0 0</pose>
+          <topic>/beam2</topic>
+          <update_rate>20</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>30.0</max>
+              <resolution>0.001</resolution>
+            </range>
+          </ray>
+          <always_on>true</always_on>
+          <visualize>true</visualize>
+        </sensor>
+
+        <!-- beam3 -->
+        <sensor name="beam3" type="gpu_lidar">
+          <pose relative_to="beam3_frame">0 0 0 0 0 0</pose>
+          <topic>/beam3</topic>
+          <update_rate>20</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>30.0</max>
+              <resolution>0.001</resolution>
+            </range>
+          </ray>
+          <always_on>true</always_on>
+          <visualize>true</visualize>
+        </sensor>
+
+        <!-- beam4 -->
+        <sensor name="beam4" type="gpu_lidar">
+          <pose relative_to="beam4_frame">0 0 0 0 0 0</pose>
+          <topic>/beam4</topic>
+          <update_rate>20</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>1</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>0</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.08</min>
+              <max>30.0</max>
+              <resolution>0.001</resolution>
+            </range>
+          </ray>
+          <always_on>true</always_on>
+          <visualize>true</visualize>
+        </sensor>
+      </link>
+
+      <!-- 直接按机体速度控制 -->
+      <plugin filename="gz-sim-velocity-control-system"
+              name="gz::sim::systems::VelocityControl">
+        <topic>/cmd_vel</topic>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>
