@@ -44,6 +44,7 @@ class Plane{
     int beam_count;
     double d;
     double residual;
+    double max_residual;
     Beam& B1;
     Beam& B2;
     Beam& B3;
@@ -57,7 +58,7 @@ class Plane{
     bool plane_cal(void);
 
     public:
-    Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4);
+    Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4, double max_r);
     /* 
             调用波束数据进行平面拟合，返回此次拟合出平面的有效位
             未对波束信息是否全部更新进行检查，需要在更新波束数据后调用

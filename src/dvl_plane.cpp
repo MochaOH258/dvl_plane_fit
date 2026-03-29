@@ -131,10 +131,10 @@
         return valid;
     }
 
-    Plane::Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4)
+    Plane::Plane(Beam& Beam1, Beam& Beam2, Beam& Beam3, Beam& Beam4, double max_r)
     : valid(false), beam_count(0),
       d(0.0), residual(0.0),
-      B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4)
+      B1(Beam1), B2(Beam2), B3(Beam3), B4(Beam4), max_residual(max_r)
     {
         n = Eigen::Vector3d::Zero();
     }

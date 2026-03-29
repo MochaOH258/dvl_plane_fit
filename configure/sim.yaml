@@ -1,0 +1,28 @@
+dvl_ros_node:
+  ros__parameters:
+    use_sim_time: true
+    desired_distance: 0.8
+    desired_sway_speed: 0.5
+    freq: 10.0
+    # los_lookahead: 1.0
+    b1_beta: 0.955316618
+    b1_gamma: 0.785398163
+    b2_beta: 0.955316618
+    b2_gamma: -0.785398163
+    b3_beta: -0.955316618
+    b3_gamma: 0.785398163
+    b4_beta: -0.955316618
+    b4_gamma: -0.785398163
+    max_residual: 40.0
+    yaw_kp: 1.0
+    yaw_ki: 0.0
+    yaw_kd: 0.0
+    surge_kp: 1.0
+    surge_ki: 0.0
+    surge_kd: 0.0
+    sway_kp: 1.0
+    sway_ki: 0.0
+    sway_kd: 0.0
+    max_u: 0.5
+    max_v: 1.0
+    max_r: 0.5

@@ -11,6 +11,8 @@ class PID{
     double ki;
     double kd;
 
+    double max;
+
     double dt;
 
     double pre_err;
@@ -19,7 +21,7 @@ class PID{
     double pid_cal(double err);
 
     public:
-    PID(double p, double i, double d, double t);
+    PID(double p, double i, double d, double t, double m);
     void set_pid(double p, double i, double d);
     double pid_output(double error);
     void set_dt(double t);

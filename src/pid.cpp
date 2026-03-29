@@ -26,17 +26,6 @@
 
         double r_cmd = YawPID.pid_output(yaw_err);
 
-         
-            if (r_cmd > 5)
-            {
-                r_cmd = 5;
-            }
-            else if (r_cmd < -5)
-            {
-                r_cmd = -5;
-            }
-        
-
         cmd[idx_r] = r_cmd;
         return r_cmd;
     }
@@ -52,14 +41,7 @@
         {
             u_cmd*=0.2;
         }
-        if (u_cmd > 2)
-            {
-                u_cmd = 2;
-            }
-            else if (u_cmd < -2)
-            {
-                u_cmd = -2;
-            }
+        
         cmd[idx_u] = u_cmd;
         return u_cmd;
     }
@@ -74,14 +56,7 @@
         {
             v_cmd*=0.2;
         }
-        if (v_cmd > 2)
-            {
-                v_cmd = 2;
-            }
-            else if (v_cmd < -2)
-            {
-                v_cmd = -2;
-            }
+        
         cmd[idx_v] = v_cmd;
         return v_cmd;
         
@@ -196,10 +171,22 @@
            double delta = (err - pre_err)/dt;
            pre_err = err;
 
+           double output = kp*err + ki*int_err + kd*delta;
+
+            if (output > max)
+            {
+                output = max;
+            }
+            else if (output < -max)
+            {
+                output = -max;
+            }
+            
+
            return kp*err + ki*int_err + kd*delta;
         }
 
-    PID::PID(double p, double i, double d, double t): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0), dt(t){}
+    PID::PID(double p, double i, double d, double t, double m): kp(p), ki(i), kd(d), pre_err(0.0), int_err(0.0), dt(t), max(m){}
 
     void PID::set_pid(double p, double i, double d)
     {
