@@ -15,11 +15,11 @@
         double yaw_err = yaw - expc_yaw_angle;
         if (yaw_err > M_PI)
         {
-            yaw_err -= M_PI;
+            yaw_err -= 2.0 * M_PI;
         }
         else if (yaw_err < -M_PI)
         {
-            yaw_err += M_PI;
+            yaw_err += 2.0 * M_PI;
         }
 
         yaw_error = yaw_err;
@@ -37,7 +37,7 @@
         double u_cmd = DistancePID.pid_output(dist_err);
 
         /* 限幅, 考虑yaw_error */
-        if (std::abs(yaw_error) > 20)
+        if (std::abs(yaw_error) > 0.1*M_PI)
         {
             u_cmd*=0.2;
         }
@@ -52,7 +52,7 @@
 
         double v_cmd = VPID.pid_output(v_err);
         /* 限幅 */
-        if (std::abs(yaw_error) > 20)
+        if (std::abs(yaw_error) > 0.1*M_PI)
         {
             v_cmd*=0.2;
         }
