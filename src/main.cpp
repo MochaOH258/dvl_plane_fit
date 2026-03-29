@@ -14,10 +14,10 @@ int main(void)
     Beam B2(0.955316618, -0.785398163);
     Beam B3(-0.955316618, 0.785398163);
     Beam B4(-0.955316618, -0.785398163);
-    Plane P(B1, B2, B3, B4);
-    PID Yaw(1.0, 0.0, 0.0, t);
-    PID Dist(1.0, 0.0, 0.0, t);
-    PID Vel(1.0, 0.0, 0.0, t);
+    Plane P(B1, B2, B3, B4, 40.0);
+    PID Yaw(1.0, 0.0, 0.0, t, 20.0);
+    PID Dist(1.0, 0.0, 0.0, t, 20.0);
+    PID Vel(1.0, 0.0, 0.0, t, 20.0);
     Controller Ctrl(100.0, 0.0, 50.0, Yaw, Dist, Vel, P);
 
     std::array<double, 4> dist{2.0, 2.1, 1.9, 2.0};

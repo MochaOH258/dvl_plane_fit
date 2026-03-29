@@ -181,7 +181,6 @@ DvlRosNode::DvlRosNode()
 void DvlRosNode::declare_and_load_parameters()
 {
     // 通用
-    this->declare_parameter<bool>("use_sim_time", true);
     this->declare_parameter<double>("desired_distance", 0.8);
     this->declare_parameter<double>("desired_sway_speed", 0.5);
     this->declare_parameter<double>("freq", 10.0);
